@@ -29,10 +29,10 @@ export class AuthController {
 
         return this.authService.login(LoginUserDto);
     }
-
-    @Post('refresh_token')
+    
+    @Post('refresh-token')
     refreshToken(@Body() {refresh_token}):Promise<any>{
         console.log('refresh_token api');
-        return this.authService.refresh_token(refresh_token);
+        return this.authService.refreshToken(refresh_token);
     }
 }

@@ -31,53 +31,76 @@ export class PostService {
                 throw new HttpException('Cant create Post',HttpStatus.BAD_REQUEST);
         }
     }
-    async findAll(query:FilterPostDto):Promise<any>{
+    async findAll(query: FilterPostDto): Promise<any> {
         const items_per_page = Number(query.items_per_page) || 10;
         const page = Number(query.page) || 1;
         const search = query.search || '';
-
-        const skip = (page-1)*items_per_page;
-        const[res,total] = await this.postRepository.findAndCount({
-            where:[
-                {title: Like('%'+search+'%')},
-                {description:Like('%'+search+'%')}
-            ],
-            order:{created_at:'DESC'},
-            take:items_per_page,
-            skip:skip,
-            relations:{
-                user:true
+    
+        const category = Number(query.category) || null;
+        const skip = (page - 1) * items_per_page;
+    
+        const whereCondition: any[] = [
+            {
+                title: Like('%' + search + '%'),
             },
-            select:{
-                user:{
-                    id:true,
-                    first_name:true,
-                    last_name:true,
-                    email:true,
-                    avatar:true
+            {
+                description: Like('%' + search + '%'),
+            },
+        ];
+    
+        if (category !== null) {
+            whereCondition.forEach(condition => {
+                condition.category = { id: category };
+            });
+        }
+    
+        const [res, total] = await this.postRepository.findAndCount({
+            where: whereCondition,
+            order: { created_at: 'DESC' },
+            take: items_per_page,
+            skip: skip,
+            relations: {
+                user: true,
+                category: true
+            },
+            select: {
+                category: {
+                    id: true,
+                    name: true
+                },
+                user: {
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    email: true,
+                    avatar: true
                 }
             }
-        })
-
-        const lastPage = Math.ceil(total/items_per_page);
-        const nextPage = page + 1 >lastPage ? null : page + 1;
+        });
+    
+        const lastPage = Math.ceil(total / items_per_page);
+        const nextPage = page + 1 > lastPage ? null : page + 1;
         const prevPage = page - 1 < 1 ? null : page - 1;
-
+    
         return {
-            data:res,
+            data: res,
             total,
-            currentPage:page,
+            currentPage: page,
             nextPage,
             prevPage,
             lastPage
-        }
+        };
     }
 
     async findDetail(id:number):Promise<Post | null>{
         return await this.postRepository.findOne({
             where:{id},
-            relations:['user'],
+            relations:['user','category'],
             select:{
+                category:{
+                    id:true,
+                    name:true
+                },
                 user:{
                     id:true,
                     first_name:true,

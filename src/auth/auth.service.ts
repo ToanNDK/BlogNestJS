@@ -27,6 +27,7 @@ export class AuthService {
                 where:{email:LoginUserDto.email}
             }
         )
+        await new Promise(resolve => setTimeout(resolve,2000));
             if(!user){
                 throw new HttpException("Email is not exist", HttpStatus.UNAUTHORIZED);
             }
@@ -39,7 +40,7 @@ export class AuthService {
             return this.generateToken(payload);
             
     }
-    async refresh_token(refresh_token:string):Promise<any>{
+    async refreshToken(refresh_token:string):Promise<any>{
         try {
             const verify = await this.jwtService.verifyAsync(refresh_token,{
                 secret:this.configService.get<string>('SECRET')
@@ -79,4 +80,3 @@ export class AuthService {
     }
 }
 
-//them vao db
