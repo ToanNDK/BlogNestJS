@@ -64,12 +64,14 @@ export class AuthService {
             secret:this.configService.get<string>('SECRET'),
             expiresIn:this.configService.get<string>('EXP_IN_REFRESH_TOKEN')
         })
+        
         await this.userRepository.update(
             {email:payload.email},
             {refresh_token:refresh_token}
         )
 
         return{access_token,refresh_token};
+        
     }
     //hash pw
     private async hashPassword(password: string ): Promise<string>{

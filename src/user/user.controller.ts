@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, ParseArrayPipe, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, ParseArrayPipe, Post, Put, Query, Req, SetMetadata, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -9,14 +9,16 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageConfig } from 'helpers/config';
 import { extname } from 'path';
-
+import { Roles } from 'src/auth/decorator/roles.decorator';
 @ApiBearerAuth()
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) { }
 
-    @UseGuards(AuthGuard)
+    
+   
+    @Roles('Admin')
     @ApiQuery({ name: 'page' })
     @ApiQuery({ name: 'items_per_page' })
     @ApiQuery({ name: 'search' })
@@ -26,34 +28,40 @@ export class UserController {
         return this.userService.findAll(query);
     }
 
-    @UseGuards(AuthGuard)
+    @Roles('Admin')
     @Get('profile')
     profile(@Req () req:any):Promise<User | null>{
         return this.userService.findOne(Number(req.user_data.id));
     }
-    @UseGuards(AuthGuard)
+    
     @Get(':id')
     findOne(@Param('id') id: string): Promise<User | null> {
         return this.userService.findOne(Number(id));
     }
 
-    @UseGuards(AuthGuard)
+    @Roles('Admin')
+
     @Post()
     create(@Body() createUserDto: CreateUserDto): Promise<User> {
         return this.userService.create(createUserDto);
     }
 
-    @UseGuards(AuthGuard)
+    @Roles('Admin')
+
+    
     @Put(':id')
     update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
         return this.userService.update(Number(id), updateUserDto);
     }
+    @Roles('Admin')
 
     @Delete('multiple')
     multipleDelete(@Query('ids', new ParseArrayPipe({ items: String, separator: ',' })) ids: string[]) {
         console.log("delete multi=> ", ids)
         return this.userService.multipleDelete(ids)
     }
+
+    @Roles('Admin')
 
     @UseGuards(AuthGuard)
     @Delete(':id')
@@ -62,7 +70,7 @@ export class UserController {
     }
 
     @Post('upload-avatar')
-    @UseGuards(AuthGuard)
+    
     @UseInterceptors(FileInterceptor('avatar', {
         storage: storageConfig('avatar'),
         fileFilter: (req, file, cb) => {
