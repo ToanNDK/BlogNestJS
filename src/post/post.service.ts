@@ -7,7 +7,7 @@ import { Post } from './entities/post.entity';
 import { FilterPostDto } from './dto/filter-post.dto';
 import { title } from 'process';
 import { UpdatePostDto } from './dto/update-post.dto';
-
+import { BadRequestException } from '@nestjs/common';
 @Injectable()
 export class PostService {
     constructor (
@@ -112,8 +112,12 @@ export class PostService {
         })
     }
 
-    async update(id:number,updatePostDto: UpdatePostDto):Promise<UpdateResult>{
-        return await this.postRepository.update(id,updatePostDto);
+    async update(id: number, updatePostDto: UpdatePostDto): Promise<UpdateResult> {
+        if (!updatePostDto || Object.keys(updatePostDto).length === 0) {
+            throw new BadRequestException('No update data provided.');
+        }
+    
+        return await this.postRepository.update(id, updatePostDto);
     }
 
     async delete(id:number):Promise<DeleteResult>{
