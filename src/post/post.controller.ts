@@ -9,6 +9,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { FilterPostDto } from './dto/filter-post.dto';
 import { Post as PostEntity } from './entities/post.entity';
+import { Roles } from 'src/auth/decorator/roles.decorator';
 
 @Controller('posts')
 export class PostController {
@@ -66,8 +67,9 @@ export class PostController {
     }
 
     @UseGuards(AuthGuard)
-@Put(':id')
-@UseInterceptors(FileInterceptor('thumbnail', {
+    @Roles('Admin')
+    @Put(':id')
+    @UseInterceptors(FileInterceptor('thumbnail', {
     storage: storageConfig('post'),
     fileFilter: (req, file, cb) => {
         const ext = extname(file.originalname);
@@ -105,6 +107,7 @@ update(
 }
 
     @UseGuards(AuthGuard)
+    @Roles('Admin')
     @Delete(':id')
     delete(@Param('id') id: string) {
         return this.postService.delete(Number(id));

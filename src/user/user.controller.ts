@@ -28,7 +28,7 @@ export class UserController {
         return this.userService.findAll(query);
     }
 
-    @Roles('Admin')
+    
     @Get('profile')
     profile(@Req () req:any):Promise<User | null>{
         return this.userService.findOne(Number(req.user_data.id));
